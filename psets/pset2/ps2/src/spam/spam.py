@@ -41,18 +41,26 @@ def create_dictionary(messages):
     """
 
     # *** START CODE HERE ***
-    normText = get_words(messages)
-    feature = {}
+    normalized_messages = get_words(messages)
+    dictionary = {}
+    i = 0
+    for message in normalized_messages:
+        small = []
+        for element in message:
+            if element not in small:
+                try:
+                    dictionary[element] += 1
+                    small.append(element)
+                except:
+                    dictionary[element] = 1
+                    i += 1
+                    small.append(element)
 
-    for text in normText:
-        lista = []
-        for word in text:
-            if word not in lista:
-                feature[word] = feature[word] + 1 if word in feature else 1
-                lista.append(word)
+    word_dict = {word: number for word, number in dictionary.items() if number >= 5}
+    dict_count = {key: index for index, key in enumerate(word_dict)}
 
-    featuredDic = {word: n for word, n in feature.items() if n >= 5}
-    return dict(sorted(featuredDic.items(), key=lambda item: item[1]))
+    word_dic = dict(sorted(word_dict.items(), key=lambda item: item[1]))
+    return dict_count
     # *** END CODE HERE ***
 
 
@@ -77,18 +85,19 @@ def transform_text(messages, word_dictionary):
         j-th vocabulary word in the i-th message.
     """
     # *** START CODE HERE ***
-    keys = list(word_dictionary.keys())
-    mat = np.zeros((len(messages), len(word_dictionary)))
+    normalized_messages = get_words(messages)
+    r = len(normalized_messages)
+    c = len(word_dictionary)
 
-    for i, text in enumerate(messages):
-        for word in text.split(' '):
-            if word in word_dictionary:
-                j = keys.index(word)
-                mat[i, j] += 1
+    matrix = np.zeros((r, c))
 
-    return mat
+    for count, message in enumerate(normalized_messages):
+        for element in message:
+            if element in word_dictionary:
+                matrix[count, word_dictionary[element]] += 1
+
+    return matrix
     # *** END CODE HERE ***
-
 
 def fit_naive_bayes_model(matrix, labels):
     """Fit a naive bayes model.
@@ -109,12 +118,16 @@ def fit_naive_bayes_model(matrix, labels):
     # *** START CODE HERE ***
     r, c = matrix.shape
 
-    phi_y = (1 + np.sum(labels)) / (2 + r)
-    phi_y_c = 1 - phi_y
-    phi_k_given_y1 = (1 + np.sum(matrix[labels == 1, :], axis=0)) / (c + np.sum(matrix[labels == 1, :]))
-    phi_k_given_y0 = (1 + np.sum(matrix[labels == 0, :], axis=0)) / (c + np.sum(matrix[labels == 0, :]))
+    phi_y = np.sum(labels) / r
+    phi_y_complement = 1 - phi_y
 
-    return phi_y, phi_y_c, phi_k_given_y1, phi_k_given_y0
+    num_phi_k_given_y1 = np.sum(matrix[labels == 1, :], axis=0)
+    num_phi_k_given_y0 = np.sum(matrix[labels == 0, :], axis=0)
+
+    phi_k_given_y1 = (1 + num_phi_k_given_y1) / (c + np.sum(matrix[labels == 1, :]))
+    phi_k_given_y0 = (1 + num_phi_k_given_y0) / (c + np.sum(matrix[labels == 0, :]))
+
+    return phi_y, phi_y_complement, phi_k_given_y1, phi_k_given_y0
     # *** END CODE HERE ***
 
 
@@ -133,13 +146,14 @@ def predict_from_naive_bayes_model(model, matrix):
     # *** START CODE HERE ***
     phi_y, phi_y_complement, phi_k_given_y1, phi_k_given_y0 = model
 
-    log_p_y1 = np.dot(matrix, np.log(phi_k_given_y1)) + np.log(phi_y)
-    log_p_y0 = np.dot(matrix, np.log(phi_k_given_y0)) + np.log(phi_y_complement)
+    log_py1 = np.dot(matrix, np.log(phi_k_given_y1)) + np.log(phi_y)
+    log_py0 = np.dot(matrix, np.log(phi_k_given_y0)) + np.log(phi_y_complement)
 
-    prediction = log_p_y1 > log_p_y0
+    y_pred = log_py1 > log_py0
 
-    np.savetxt('spam_naive_bayes_predictions', prediction)
-    return prediction.astype(int)
+    np.savetxt('spam_naive_bayes_predictions', y_pred)
+
+    return y_pred.astype(int)
     # *** END CODE HERE ***
 
 
@@ -158,13 +172,15 @@ def get_top_five_naive_bayes_words(model, dictionary):
     # *** START CODE HERE ***
     phi_y, phi_y_complement, phi_k_given_y1, phi_k_given_y0 = model
 
-    v = np.log((phi_k_given_y1 / phi_k_given_y0))
+    vector = np.log((phi_k_given_y1 / phi_k_given_y0))
 
-    top = np.argpartition(v, -5)[-5:]
+    i = np.argpartition(vector, -5)[-5:]
 
-    sortedo = top[np.argsort(-v[top])]
+    s = i[np.argsort(-vector[i])]
 
-    return [list(dictionary.keys())[i] for i in sortedo]
+    top_keys = [list(dictionary.keys())[i] for i in s]
+
+    return top_keys
     # *** END CODE HERE ***
 
 
