@@ -1,0 +1,68 @@
+
+
+\def\qtr{Summer 2023}
+\def\due{Friday, August 11 at 11:59 pm}
+\def\edstem{\url{https://edstem.org/us/courses/41182/discussion/}}
+\def\psetnum{3}
+
+%%% Change the following flag to toggle between questions or solutions
+\ifdefined\solutions {} \else \def\solutions{1} \fi
+
+\input{macros.tex}
+
+\def\shownotes{0}  %set 1 to show author notes
+\ifnum\shownotes=1
+\newcommand{\authnote}[2]{[#1: #2]}
+\else
+\newcommand{\authnote}[2]{}
+\fi
+
+\newcommand{\tnote}[1]{{\color{blue}\authnote{TM}{#1}}}
+\newcommand{\fk}[1]{{\color{purple}{[FK:#1]}}}
+\newcommand{\notes}[1]{{\color{blue} Note:} \textit{#1} \newline}
+
+
+\usepackage{textcomp}
+\usepackage{dsfont}
+
+\begin{document}
+
+\pagestyle{myheadings} \markboth{}{CS229 Problem Set \#\psetnum}
+
+\ifnum\solutions=1{
+{\huge\noindent CS 229, \qtr\\
+Problem Set \#\psetnum Solutions}\\\\
+YOUR NAME HERE (\texttt{YOUR SUNET HERE})
+} \else {\huge
+\noindent CS 229, \qtr\\
+Problem Set \#\psetnum
+} \fi
+
+\ruleskip
+
+{\bf Due {\due } on Gradescope.}
+
+\medskip
+
+\input{00-instructions/00-main}
+
+\begin{enumerate}[wide, labelwidth=!, labelindent=0pt]
+
+\clearpage
+\input{k_means/00-main}
+
+\clearpage
+\input{semi_supervised_em/00-main}
+
+\clearpage
+\input{pca/00-main}
+
+\clearpage
+\input{ica/00-main}
+
+\clearpage
+\input{cartpole/00-main}
+
+\end{enumerate}
+
+\end{document}

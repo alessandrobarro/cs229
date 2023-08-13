@@ -1,0 +1,10 @@
+name: cs229
+channels:
+  - defaults
+dependencies:
+  - matplotlib=3.6.0
+  - numpy=1.23.3
+  - pip
+  - python=3.9
+  - scipy
+  - pillow
